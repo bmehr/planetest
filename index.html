@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Aircraft AR Viewer</title>
 
-  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+  <!-- Latest model-viewer v4.x -->
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
 
   <style>
     * {
@@ -41,27 +42,43 @@
       cursor: pointer;
       z-index: 999;
     }
+    .instruction-pill {
+      position: absolute;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.7);
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      pointer-events: none;
+      z-index: 999;
+      display: none;
+    }
   </style>
 </head>
 <body>
 
+  <div id="instruction" class="instruction-pill">Move camera around floor to place object</div>
+
   <!--
-    Key changes:
-    - bounds="tight": Calculates real physical bounds so the floor sits flush with the bottom.
-    - scale="2 2 2": Scales up the plane from 28cm to ~56cm so it is clearly visible.
-    - ar-modes="webxr scene-viewer quick-look": Ensures native fallback.
-    - ar-scale="auto": Allows you to pinch to scale it in AR if it's too big/small.
+    Key Fixes:
+    - ar-modes="webxr quick-look": Excludes scene-viewer so scaling and textures are rendered directly in-browser.
+    - ar-scale="auto": Allows initial placement to be pinch-scaled if needed.
+    - bounds="tight": Forces bottom geometry alignment to the floor plane.
+    - scale="2.5 2.5 2.5": Makes the aircraft ~70cm long so it is easily spotted immediately upon plane lock.
   -->
   <model-viewer
     id="viewer"
-    src="aircraft_chrome.glb"
+    src="./aircraft_chrome.glb"
     alt="Chrome Aircraft"
     ar
-    ar-modes="webxr scene-viewer quick-look"
+    ar-modes="webxr quick-look"
     ar-placement="floor"
     ar-scale="auto"
     bounds="tight"
-    scale="2 2 2"
+    scale="2.5 2.5 2.5"
     camera-controls
     auto-rotate
     shadow-intensity="1.5"
@@ -71,8 +88,23 @@
     <button slot="ar-button" class="ar-button">
       View in your space
     </button>
-
   </model-viewer>
+
+  <script>
+    const viewer = document.getElementById('viewer');
+    const instruction = document.getElementById('instruction');
+
+    // Ensure absolute URL resolution to prevent intent/path failure
+    viewer.src = new URL('aircraft_chrome.glb', window.location.href).href;
+
+    viewer.addEventListener('ar-status', (event) => {
+      if (event.detail.status === 'session-started') {
+        instruction.style.display = 'block';
+      } else {
+        instruction.style.display = 'none';
+      }
+    });
+  </script>
 
 </body>
 </html>
