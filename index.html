@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Aircraft AR Viewer</title>
 
-  <!-- Google Model Viewer -->
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
 
   <style>
@@ -18,7 +17,7 @@
       width: 100vw;
       height: 100vh;
       overflow: hidden;
-      background-color: #1a1a1a;
+      background-color: #121212;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
     model-viewer {
@@ -28,33 +27,31 @@
     }
     .ar-button {
       background-color: #0071e3;
-      border-radius: 24px;
+      border-radius: 28px;
       border: none;
       color: white;
-      font-size: 15px;
+      font-size: 16px;
       font-weight: 600;
       padding: 14px 28px;
       position: absolute;
-      bottom: 30px;
+      bottom: 32px;
       left: 50%;
       transform: translateX(-50%);
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
       cursor: pointer;
       z-index: 999;
-    }
-    .loading-bar {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      color: white;
-      font-size: 14px;
-      pointer-events: none;
     }
   </style>
 </head>
 <body>
 
+  <!--
+    Key changes:
+    - bounds="tight": Calculates real physical bounds so the floor sits flush with the bottom.
+    - scale="2 2 2": Scales up the plane from 28cm to ~56cm so it is clearly visible.
+    - ar-modes="webxr scene-viewer quick-look": Ensures native fallback.
+    - ar-scale="auto": Allows you to pinch to scale it in AR if it's too big/small.
+  -->
   <model-viewer
     id="viewer"
     src="aircraft_chrome.glb"
@@ -63,33 +60,19 @@
     ar-modes="webxr scene-viewer quick-look"
     ar-placement="floor"
     ar-scale="auto"
+    bounds="tight"
+    scale="2 2 2"
     camera-controls
-    touch-action="pan-y"
-    shadow-intensity="1"
-    exposure="1.0">
-
-    <div slot="poster" class="loading-bar">Loading 3D Model...</div>
+    auto-rotate
+    shadow-intensity="1.5"
+    shadow-softness="0.5"
+    exposure="1.2">
 
     <button slot="ar-button" class="ar-button">
       View in your space
     </button>
+
   </model-viewer>
-
-  <script>
-    const viewer = document.getElementById('viewer');
-
-    // Display clear error if the model path fails
-    viewer.addEventListener('error', (event) => {
-      console.error('Model loading error:', event);
-      alert('Could not load 3D model. Check that "aircraft_chrome.glb" is in the same folder as this HTML file.');
-    });
-
-    viewer.addEventListener('ar-status', (event) => {
-      if (event.detail.status === 'failed') {
-        alert('AR launch failed. Make sure you are on a compatible mobile device (Safari on iOS or Chrome on Android).');
-      }
-    });
-  </script>
 
 </body>
 </html>
